@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hinnang</title>
-    <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <!-- Custom CSS for star rating -->
     <style>
         .rating {
             unicode-bidi: bidi-override;
@@ -93,7 +91,7 @@
                 exit;
             }
 
-            // Insert data into database
+            
             $sql = "INSERT INTO hinnangud (soogi_id, nimi_id, kasutaja, hinne, kommentaar) VALUES ('$soogi_id', '$nimi_id', '$nimi', '$hinne', '$kommentaar')";
 
             if ($conn->query($sql) === TRUE) {
@@ -144,7 +142,7 @@
             die("Ühenduse viga: " . $conn->connect_error);
         }
 
-        // Fetch and display existing reviews
+        
         $soogi_id = isset($_GET['id']) ? $_GET['id'] : '';
         $sql_reviews = "SELECT kasutaja, hinne, kommentaar FROM hinnangud WHERE soogi_id = $soogi_id";
         $result_reviews = $conn->query($sql_reviews);

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Muuda söögikohta</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 <body>
@@ -12,10 +11,10 @@
         <h1 class="mt-5">Muuda söögikohta</h1>
 
         <?php
-        // Retrieve the restaurant ID from the URL parameter
+        
         $restaurant_id = $_GET['id'];
 
-        // Fetch restaurant details from the database based on the ID
+        
         $conn = new mysqli('localhost', 'mart', 'parool', 'loputoo');
         if ($conn->connect_error) {
             die("Ühenduse viga: " . $conn->connect_error);
