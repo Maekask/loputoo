@@ -77,7 +77,7 @@
                     <tbody>";
             while($row = $result->fetch_assoc()) {
                 echo "<tr>
-                        <td><a href='hinda.php?id=" . $row["id"] . "'>" . $row["nimi"] . "</a></td>
+                        <td><a href='rate.php?id=" . $row["id"] . "'>" . $row["nimi"] . "</a></td>
                         <td>" . $row["asukoht"] . "</td>
                         <td>" . $row["keskmine_hinne"] . "</td>
                         <td>" . $row["hinnatud"] . "</td>
