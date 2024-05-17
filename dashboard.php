@@ -3,157 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dash</title>
+    <title>Söögikohad</title>
+    <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 <body>
-    <?php
-    session_start();
-
-    
-    if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-        header('Location: login.php');
-        exit;
-    }
-
-    
-    $conn = new mysqli('localhost', 'mart', 'parool', 'loputoo');
-
-    
-    if ($conn->connect_error) {
-        die("Ühenduse viga: " . $conn->connect_error);
-    }
-
-    
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_add'])) {
-        $nimi = $_POST['nimi'];
-        $aadress = $_POST['aadress'];
-        $tyyp = $_POST['tyyp']; 
+    <div class="container">
+        <h1 class="mt-5">Admin</h1>
 
        
-        $sql = "INSERT INTO soogikohad (nimi, asukoht, tyyp) VALUES ('$nimi', '$aadress', '$tyyp')";
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="GET" class="mb-3">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Otsi nime järgi" aria-label="Search" name="search">
+                <button class="btn btn-outline-secondary" type="submit">Otsi</button>
+            </div>
+        </form>
+
+        <?php
         
-        if ($conn->query($sql) === TRUE) {
-            echo "Söögikoht on edukalt lisatud.";
-        } else {
-            echo "Viga: " . $conn->error;
+        $conn = new mysqli('localhost', 'mart', 'parool', 'loputoo');
+
+        
+        if ($conn->connect_error) {
+            die("Ühenduse viga: " . $conn->connect_error);
         }
-    }
 
-    // Kui kasutaja soovib söögikohta muuta
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_edit'])) {
-        $id = $_POST['id'];
-        $nimi = $_POST['nimi'];
-        $aadress = $_POST['aadress'];
-       
-        $sql = "UPDATE soogikohad SET nimi='$nimi', asukoht='$aadress' WHERE id=$id";
         
-        if ($conn->query($sql) === TRUE) {
-            echo "Söögikoht on edukalt muudetud.";
+        $results_per_page = 10;
+        if (!isset($_GET['page'])) {
+            $page = 1;
         } else {
-            echo "Viga: " . $conn->error;
+            $page = $_GET['page'];
         }
-    }
-
-    
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete'])) {
-        $id = $_POST['id'];
+        $start_from = ($page - 1) * $results_per_page;
 
         
-        $sql = "DELETE FROM soogikohad WHERE id=$id";
+        $sortColumn = isset($_GET['sort']) ? $_GET['sort'] : 'id';
+        $sortDirection = isset($_GET['dir']) ? $_GET['dir'] : 'ASC';
+        $validColumns = ['nimi', 'asukoht', 'keskmine_hinne', 'hinnatud'];
+        if (!in_array($sortColumn, $validColumns)) {
+            $sortColumn = 'id';
+        }
+        $sortIcon = $sortDirection === 'ASC' ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="20" height="20" data-slot="icon"><path fill-rule="evenodd" d="M6.97 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06L8.25 4.81V16.5a.75.75 0 0 1-1.5 0V4.81L3.53 8.03a.75.75 0 0 1-1.06-1.06l4.5-4.5Zm9.53 4.28a.75.75 0 0 1 .75.75v11.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 1 1 1.06-1.06l3.22 3.22V7.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="25" height="25" data-slot="icon"><path fill-rule="evenodd" d="M16.03 21.53a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.22 3.22V3.75a.75.75 0 0 1 1.5 0v15.44l3.22-3.22a.75.75 0 0 1 1.06 1.06l-4.5 4.5Zm-9.53-4.28a.75.75 0 0 1-.75-.75V5.06l-3.22 3.22a.75.75 0 1 1-1.06-1.06l4.5-4.5a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 1 1-1.06 1.06L6.28 5.06v11.69a.75.75 0 0 1-.75.75Z" clip-rule="evenodd"/></svg>';
+
         
-        if ($conn->query($sql) === TRUE) {
-            echo "Söögikoht on edukalt kustutatud.";
+        if (isset($_GET['search'])) {
+            $search = $_GET['search'];
+            
+            $sql = "SELECT * FROM soogikohad WHERE nimi LIKE '%$search%' ORDER BY $sortColumn $sortDirection LIMIT $start_from, $results_per_page";
         } else {
-            echo "Viga: " . $conn->error;
+            
+            $sql = "SELECT * FROM soogikohad ORDER BY $sortColumn $sortDirection LIMIT $start_from, $results_per_page";
         }
-    }
 
-    
-    function displayRestaurants($conn) {
-        $sql = "SELECT id, nimi, asukoht FROM soogikohad";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
-            echo "<h2>Söögikohad:</h2>";
-            echo '<div class="table-responsive">';
-            echo '<table class="table table-striped">';
-            echo '<thead>';
-            echo '<tr>';
-            echo '<th scope="col">Nimi</th>';
-            echo '<th scope="col">Aadress</th>';
-            echo '<th scope="col">Tegevused</th>';
-            echo '</tr>';
-            echo '</thead>';
-            echo '<tbody>';
-            while ($row = $result->fetch_assoc()) {
-                echo '<tr>';
-                echo '<td>' . $row['nimi'] . '</td>';
-                echo '<td>' . $row['asukoht'] . '</td>';
-                echo '<td><a href="dashboard.php?action=edit&id=' . $row['id'] . '">Muuda</a> | <form method="post" style="display:inline"><input type="hidden" name="id" value="' . $row['id'] . '"><input type="submit" name="submit_delete" value="Kustuta"></form></td>';
-                echo '</tr>';
+            
+            echo "<table class='table table-bordered mt-3'>
+                    <thead>
+                        <tr>
+                            <th><a href='{$_SERVER['PHP_SELF']}?sort=nimi&dir=" . ($sortColumn === 'nimi' && $sortDirection === 'ASC' ? 'DESC' : 'ASC') . "'>Nimi $sortIcon</a></th>
+                            <th><a href='{$_SERVER['PHP_SELF']}?sort=asukoht&dir=" . ($sortColumn === 'asukoht' && $sortDirection === 'ASC' ? 'DESC' : 'ASC') . "'>Asukoht $sortIcon</a></th>
+                            <th><a href='{$_SERVER['PHP_SELF']}?sort=keskmine_hinne&dir=" . ($sortColumn === 'keskmine_hinne' && $sortDirection === 'ASC' ? 'DESC' : 'ASC') . "'>Keskmine hinne $sortIcon</a></th>
+                            <th><a href='{$_SERVER['PHP_SELF']}?sort=hinnatud_kordi&dir=" . ($sortColumn === 'hinnatud_kordi' && $sortDirection === 'ASC' ? 'DESC' : 'ASC') . "'>Hinnatud kordi $sortIcon</a></th>
+                            <th>Tegevused</th>
+                        </tr>
+                    </thead>
+                    <tbody>";
+            while($row = $result->fetch_assoc()) {
+                echo "<tr>
+                        <td><a href='hinda.php?id=" . $row["id"] . "'>" . $row["nimi"] . "</a></td>
+                        <td>" . $row["asukoht"] . "</td>
+                        <td>" . $row["keskmine_hinne"] . "</td>
+                        <td>" . $row["hinnatud"] . "</td>
+                        <td>
+                            <a href='edit.php?id=" . $row["id"] . "' class='btn btn-primary'>Muuda</a>
+                            <a href='delete.php?id=" . $row["id"] . "' class='btn btn-danger'>Kustuta</a>
+                        </td>
+                    </tr>";
             }
-            echo '</tbody>';
-            echo '</table>';
-            echo '</div>';
+            echo "</tbody>
+                </table>";
+
+            
+            $sql = "SELECT COUNT(id) AS total FROM soogikohad";
+            $result = $conn->query($sql);
+            $row = $result->fetch_assoc();
+            $total_pages = ceil($row["total"] / $results_per_page);
+
+            echo "<nav aria-label='Page navigation'>
+                    <ul class='pagination'>";
+            if ($page > 1) {
+                echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=1'>Esimene</a></li>";
+                echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=".($page - 1)."'>Eelmine</a></li>";
+            }
+            if ($page < $total_pages) {
+                echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=".($page + 1)."'>Järgmine</a></li>";
+                echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=".$total_pages."'>Viimane</a></li>";
+            }
+            echo "</ul>
+                </nav>";
         } else {
             echo "Söögikohti ei leitud.";
         }
-    }
-
-    
-    if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
-        $id = $_GET['id'];
-        $sql = "SELECT id, nimi, asukoht FROM soogikohad WHERE id=$id";
-        $result = $conn->query($sql);
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            $edit_id = $row['id'];
-            $edit_name = $row['nimi'];
-            $edit_address = $row['asukoht'];
+        $conn->close();
         ?>
-        <h2>Muuda söögikohta:</h2>
-        <form method="post" action="">
-            <input type="hidden" name="id" value="<?php echo $edit_id; ?>">
-            <div class="mb-3">
-                <label for="nimi">Nimi:</label>
-                <input type="text" id="nimi" name="nimi" class="form-control" value="<?php echo $edit_name; ?>" required>
-            </div>
-            <div class="mb-3">
-                <label for="aadress">Aadress:</label>
-                <input type="text" id="aadress" name="aadress" class="form-control" value="<?php echo $edit_address; ?>" required>
-            </div>
-            <button type="submit" name="submit_edit" class="btn btn-primary">Salvesta muudatused</button>
-        </form>
-        <?php
-        }
-    } else {
-   
-        displayRestaurants($conn);
-    ?>
-    <h2>Lisa uus söögikoht:</h2>
-    <form method="post" action="">
-        <div class="mb-3">
-            <label for="nimi">Nimi:</label>
-            <input type="text" id="nimi" name="nimi" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="aadress">Aadress:</label>
-            <input type="text" id="aadress" name="aadress" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="tyyp">Tüüp:</label>
-            <input type="text" id="tyyp" name="tyyp" class="form-control" required>
-        </div>
-        <button type="submit" name="submit_add" class="btn btn-primary">Lisa söögikoht</button>
-    </form>
-    <?php
-    }
-
-    
-    $conn->close();
-    ?>
-    <a href="index.php" class="btn btn-secondary mt-3">Tagasi</a> 
+    </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
