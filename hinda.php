@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hinnang</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
         .rating {
             unicode-bidi: bidi-override;
@@ -16,7 +16,7 @@
         }
         .rating > label {
             display: inline-block;
-            margin: 0 5px;
+            margin: 0 2px;
             font-size: 30px;
             cursor: pointer;
             color: #ccc;
@@ -37,12 +37,10 @@
         
         $conn = new mysqli('localhost', 'mart', 'parool', 'loputoo');
 
-        
         if ($conn->connect_error) {
             die("Ühenduse viga: " . $conn->connect_error);
         }
 
-        
         if(isset($_GET['id'])) {
             $soogikoht_id = $_GET['id'];
             $sql = "SELECT nimi FROM soogikohad WHERE id = $soogikoht_id";
@@ -117,7 +115,12 @@
             <div class="mb-3">
                 <label class="form-label">Hinne:</label><br>
                 <div class="rating">
-                    <input type="radio" id="star5" name="hinne" value="5" required><label for="star5">&#9733;</label>
+                    <input type="radio" id="star10" name="hinne" value="10" required><label for="star10">&#9733;</label>
+                    <input type="radio" id="star9" name="hinne" value="9"><label for="star9">&#9733;</label>
+                    <input type="radio" id="star8" name="hinne" value="8"><label for="star8">&#9733;</label>
+                    <input type="radio" id="star7" name="hinne" value="7"><label for="star7">&#9733;</label>
+                    <input type="radio" id="star6" name="hinne" value="6"><label for="star6">&#9733;</label>
+                    <input type="radio" id="star5" name="hinne" value="5"><label for="star5">&#9733;</label>
                     <input type="radio" id="star4" name="hinne" value="4"><label for="star4">&#9733;</label>
                     <input type="radio" id="star3" name="hinne" value="3"><label for="star3">&#9733;</label>
                     <input type="radio" id="star2" name="hinne" value="2"><label for="star2">&#9733;</label>
@@ -165,6 +168,6 @@
         ?>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@
         }
         .rating > label {
             display: inline-block;
-            margin: 0 5px;
+            margin: 0 2px; /* Adjusted to fit more stars */
             font-size: 30px;
             cursor: pointer;
             color: #ccc;
@@ -34,20 +34,17 @@
 <body>
     <div class="container">
         <?php
-        
         $conn = new mysqli('localhost', 'mart', 'parool', 'loputoo');
-
         
         if ($conn->connect_error) {
             die("Ühenduse viga: " . $conn->connect_error);
         }
-
         
         if(isset($_GET['id'])) {
             $soogikoht_id = $_GET['id'];
             $sql = "SELECT nimi FROM soogikohad WHERE id = $soogikoht_id";
             $result = $conn->query($sql);
-
+        
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
                 $nimi = $row['nimi'];
@@ -58,57 +55,73 @@
         } else {
             echo '<h1 class="mt-5">Sisesta hinnang</h1>';
         }
-
+        
         $conn->close();
         ?>
         
-        
         <?php
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $nimi = $_POST['nimi'];
-            $hinne = $_POST['hinne'];
-            $kommentaar = $_POST['kommentaar'];
-
-            
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_review'])) {
+            if (isset($_POST['nimi']) && isset($_POST['hinne']) && isset($_POST['kommentaar'])) {
+                $nimi = $_POST['nimi'];
+                $hinne = $_POST['hinne'];
+                $kommentaar = $_POST['kommentaar'];
+        
+                $conn = new mysqli('localhost', 'mart', 'parool', 'loputoo');
+        
+                if ($conn->connect_error) {
+                    die("Ühenduse viga: " . $conn->connect_error);
+                }
+        
+                $soogi_id = isset($_GET['id']) ? $_GET['id'] : '';
+                $sql_fetch_nimi_id = "SELECT id FROM soogikohad WHERE id = $soogi_id";
+                $result_nimi_id = $conn->query($sql_fetch_nimi_id);
+        
+                if ($result_nimi_id->num_rows > 0) {
+                    $row_nimi_id = $result_nimi_id->fetch_assoc();
+                    $nimi_id = $row_nimi_id['id'];
+                } else {
+                    echo "Error: Söögikohta ei leitud.";
+                    exit;
+                }
+        
+                $sql = "INSERT INTO hinnangud (soogi_id, nimi_id, kasutaja, hinne, kommentaar) VALUES ('$soogi_id', '$nimi_id', '$nimi', '$hinne', '$kommentaar')";
+        
+                if ($conn->query($sql) === TRUE) {
+                    echo '<div class="alert alert-success" role="alert">Hinnang salvestatud edukalt.</div>';
+                    header("Location: index.php");
+                    exit;
+                } else {
+                    echo '<div class="alert alert-danger" role="alert">Viga: ' . $sql . '<br>' . $conn->error . '</div>';
+                }
+        
+                $conn->close();
+            } else {
+                echo '<div class="alert alert-danger" role="alert">Mõni välja täitmata. Palun täitke kõik väljad.</div>';
+            }
+        }
+        
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id'])) {
+            $delete_id = $_POST['delete_id'];
             $conn = new mysqli('localhost', 'mart', 'parool', 'loputoo');
-
-            
+        
             if ($conn->connect_error) {
                 die("Ühenduse viga: " . $conn->connect_error);
             }
-
-            
-            $soogi_id = isset($_GET['id']) ? $_GET['id'] : '';
-            $sql_fetch_nimi_id = "SELECT id FROM soogikohad WHERE id = $soogi_id";
-            $result_nimi_id = $conn->query($sql_fetch_nimi_id);
-
-            if ($result_nimi_id->num_rows > 0) {
-                $row_nimi_id = $result_nimi_id->fetch_assoc();
-                $nimi_id = $row_nimi_id['id'];
-            } else {
-                
-                echo "Error: Söögikohta ei leitud.";
-                exit;
-            }
-
-            
-            $sql = "INSERT INTO hinnangud (soogi_id, nimi_id, kasutaja, hinne, kommentaar) VALUES ('$soogi_id', '$nimi_id', '$nimi', '$hinne', '$kommentaar')";
-
-            if ($conn->query($sql) === TRUE) {
-                echo '<div class="alert alert-success" role="alert">Hinnang salvestatud edukalt.</div>';
-                
-             
-                header("Location: index.php");
+        
+            $sql_delete = "DELETE FROM hinnangud WHERE id = $delete_id";
+            if ($conn->query($sql_delete) === TRUE) {
+                echo '<div class="alert alert-success" role="alert">Kommentaar kustutatud edukalt.</div>';
+                $soogi_id = isset($_GET['id']) ? $_GET['id'] : '';
+                header("Location: " . $_SERVER['PHP_SELF'] . "?id=" . $soogi_id);
                 exit;
             } else {
-                echo '<div class="alert alert-danger" role="alert">Viga: ' . $sql . '<br>' . $conn->error . '</div>';
+                echo '<div class="alert alert-danger" role="alert">Viga: ' . $conn->error . '</div>';
             }
-
+        
             $conn->close();
         }
         ?>
         
-
         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>?id=<?php echo isset($_GET['id']) ? $_GET['id'] : ''; ?>">
             <div class="mb-3">
                 <label for="nimi" class="form-label">Nimi:</label>
@@ -117,7 +130,12 @@
             <div class="mb-3">
                 <label class="form-label">Hinne:</label><br>
                 <div class="rating">
-                    <input type="radio" id="star5" name="hinne" value="5" required><label for="star5">&#9733;</label>
+                    <input type="radio" id="star10" name="hinne" value="10" required><label for="star10">&#9733;</label>
+                    <input type="radio" id="star9" name="hinne" value="9"><label for="star9">&#9733;</label>
+                    <input type="radio" id="star8" name="hinne" value="8"><label for="star8">&#9733;</label>
+                    <input type="radio" id="star7" name="hinne" value="7"><label for="star7">&#9733;</label>
+                    <input type="radio" id="star6" name="hinne" value="6"><label for="star6">&#9733;</label>
+                    <input type="radio" id="star5" name="hinne" value="5"><label for="star5">&#9733;</label>
                     <input type="radio" id="star4" name="hinne" value="4"><label for="star4">&#9733;</label>
                     <input type="radio" id="star3" name="hinne" value="3"><label for="star3">&#9733;</label>
                     <input type="radio" id="star2" name="hinne" value="2"><label for="star2">&#9733;</label>
@@ -128,25 +146,21 @@
                 <label for="kommentaar" class="form-label">Kommentaar:</label>
                 <textarea name="kommentaar" id="kommentaar" rows="5" class="form-control" required></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Saada</button>
+            <button type="submit" name="submit_review" class="btn btn-primary">Saada</button>
             <a href="index.php" class="btn btn-secondary">Tagasi</a>
         </form>
 
-
         <?php
-   
         $conn = new mysqli('localhost', 'mart', 'parool', 'loputoo');
-
-  
+        
         if ($conn->connect_error) {
             die("Ühenduse viga: " . $conn->connect_error);
         }
-
         
         $soogi_id = isset($_GET['id']) ? $_GET['id'] : '';
         $sql_reviews = "SELECT kasutaja, hinne, kommentaar FROM hinnangud WHERE soogi_id = $soogi_id";
         $result_reviews = $conn->query($sql_reviews);
-
+        
         if ($result_reviews->num_rows > 0) {
             echo '<h2 class="mt-5">Teiste hinnangud:</h2>';
             echo '<ul>';
@@ -163,19 +177,7 @@
         } else {
             echo '<p class="mt-3">Selle söögikoha kohta pole veel hinnanguid antud.</p>';
         }
-
-        if(isset($_POST['delete_id'])) {
-            $delete_id = $_POST['delete_id'];
-            $sql_delete = "DELETE FROM hinnangud WHERE id = $delete_id";
-            if ($conn->query($sql_delete) === TRUE) {
-                echo '<div class="alert alert-success" role="alert">Kommentaar kustutatud edukalt.</div>';
-                header("Location: " . $_SERVER['PHP_SELF'] . "?id=" . $soogi_id);
-                exit;
-            } else {
-                echo '<div class="alert alert-danger" role="alert">Viga: ' . $conn->error . '</div>';
-            }
-        }
-
+        
         $conn->close();
         ?>
     </div>
