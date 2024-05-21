@@ -22,12 +22,13 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 <div class="container">
     <h1 class="mt-5">Admin</h1>
-
-    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="GET" class="mb-3">
+<div class="d-flex mb-3">
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="GET" class="ms-auto">
         <div class="input-group">
             <input type="text" class="form-control" placeholder="Otsi nime järgi" aria-label="Search" name="search">
             <button class="btn btn-outline-secondary" type="submit">Otsi</button>
         </div>
+</div>
     </form>
 
     <?php
@@ -95,18 +96,18 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
         $row = $result->fetch_assoc();
         $total_pages = ceil($row["total"] / $results_per_page);
 
-        echo "<nav aria-label='Page navigation'>
-                <ul class='pagination'>";
-        if ($page > 1) {
-            echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=1'>Esimene</a></li>";
-            echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=" . ($page - 1) . "'>Eelmine</a></li>";
-        }
-        if ($page < $total_pages) {
-            echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=" . ($page + 1) . "'>Järgmine</a></li>";
-            echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=" . $total_pages . "'>Viimane</a></li>";
-        }
-        echo "</ul>
-            </nav>";
+       echo "<nav aria-label='Page navigation'>
+                    <ul class='pagination justify-content-end'>";
+            if ($page > 1) {
+                echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=1'>Esimene</a></li>";
+                echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=".($page - 1)."'>Eelmine</a></li>";
+            }
+            if ($page < $total_pages) {
+                echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=".($page + 1)."'>Järgmine</a></li>";
+                echo "<li class='page-item'><a class='page-link' href='{$_SERVER['PHP_SELF']}?page=".$total_pages."'>Viimane</a></li>";
+            }
+            echo "</ul>
+                </nav>";
     } else {
         echo "Söögikohti ei leitud.";
     }
